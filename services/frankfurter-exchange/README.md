@@ -11,7 +11,7 @@ API as an x402 service on the Kite chain. Built from the
 | `GET /v1/{START}..{END}` | time series over a date range, e.g. `/v1/2024-01-01..2024-01-31` |
 | Price | $0.001 per call in pieUSD (Kite testnet) |
 | Upstream auth | none |
-| Deployed | `status: draft` — https://frankfurter-x402.onrender.com |
+| Deployed | `status: testnet` — https://frankfurter-x402.onrender.com |
 
 ## Why this is not a `.env`-only wrapper
 
@@ -86,12 +86,15 @@ $ curl -s -o /dev/null -w '%{http_code}\n' "https://api.frankfurter.dev/v1/2024-
 
 ## Status
 
-`draft`. The service is deployed and answers the x402 challenge on
-`eip155:2368` with the pieUSD price, but it has not yet been paid for end to
-end, which `CONTRIBUTING.md` requires before a manifest may claim `testnet`.
-The blocker is merchant allowlisting rather than the wrapper: Kite Passport
-refuses to execute against a host outside its discovery catalog
-(`merchant_not_allowed`), and the catalog at
-`https://service-discovery.prod.gokite.ai` lists 45 curated merchants, none of
-them on `onrender.com`. Once this service is admitted to the catalog, one paid
-call settles it and the manifest can move to `testnet`.
+`testnet`. The service answers the x402 challenge on `eip155:2368` in pieUSD,
+and a paid call has settled on-chain: tx
+`0xab67ffbb91c57fc4825553a62b41122ba5c463e703c11d7441f1aaff1409a6aa`
+(`success: true`; payer → `payTo`, 0.001 pieUSD). Unpaid → `402`, paid → `200`.
+
+One note on the payment path: `kpass session execute` still refuses this host
+client-side, because Kite's executable-service catalog does not yet include
+`frankfurter-x402.onrender.com` (`error_code: payment_target_forbidden` /
+`reason: sandbox_merchant_not_allowlisted`). The paid call above was therefore
+signed with a Kite Passport sandbox session key via the `@x402` client SDK
+against the Kite facilitator. Admitting the host to the catalog would enable the
+CLI path for regular buyers too.
