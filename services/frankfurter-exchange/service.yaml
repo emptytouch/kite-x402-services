@@ -1,0 +1,61 @@
+schema: 1
+name: frankfurter-exchange
+display_name: Frankfurter Exchange Rates
+description: >-
+  Foreign-exchange reference rates for 30+ currencies, aggregated from major
+  central banks (ECB and others) via the free, open-source Frankfurter API:
+  the latest quotes, a single historical day, and a time series across a date
+  range. Each call is priced in pieUSD on the Kite testnet and returns the
+  same JSON the upstream serves, so agents can resolve cross-currency rates
+  on demand without holding any API keys.
+maintainer:
+  github: emptytouch
+status: draft
+network: eip155:2368
+base_url: https://frankfurter-x402.onrender.com
+pay_to: "0x9e610cd701472bf7c815a6404b6ff88d81838c91"
+upstream:
+  name: Frankfurter
+  url: https://frankfurter.dev
+  requires_api_key: false
+  terms_url: https://frankfurter.dev/
+source: typescript-express
+endpoints:
+  - method: GET
+    path: /v1/latest
+    summary: Latest exchange rates for a base currency with an optional symbol filter.
+    price_usd: "0.001"
+    example_request:
+      query:
+        base: USD
+        symbols: CNY,EUR,JPY
+    pitfalls:
+      - "symbols is a comma-separated list of ISO 4217 codes, e.g. CNY,EUR,JPY"
+      - "unknown currency codes return 404 with a message"
+      - "rates are daily central-bank reference rates, not live tick data"
+  - method: GET
+    path: /v1/2024-01-02
+    summary: Historical rates for one date; the path segment is /v1/YYYY-MM-DD.
+    price_usd: "0.001"
+    example_request:
+      query:
+        base: USD
+        symbols: EUR
+    pitfalls:
+      - "the path segment must be an ISO date YYYY-MM-DD, not a query parameter"
+      - "weekends and holidays snap back to the previous published quote, so date in the response can precede the one requested"
+      - "series begins 1999-01-04; earlier dates return the earliest available quote"
+  - method: GET
+    path: /v1/2024-01-01..2024-01-31
+    summary: Time series of rates across a date range; the path is /v1/START..END.
+    price_usd: "0.001"
+    example_request:
+      query:
+        base: USD
+        symbols: EUR
+    pitfalls:
+      - "range paths use two dots between two ISO dates: START..END"
+      - "non-business days are omitted, so the response can start before START"
+      - "wide ranges over many currencies return a large body; keep symbols narrow"
+categories: [finance, data]
+tags: [exchange-rate, fx, currency, finance, frankfurter]
