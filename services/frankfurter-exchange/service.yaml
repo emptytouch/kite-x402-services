@@ -10,7 +10,7 @@ description: >-
   on demand without holding any API keys.
 maintainer:
   github: emptytouch
-status: draft
+status: testnet
 network: eip155:2368
 base_url: https://frankfurter-x402.onrender.com
 pay_to: "0x9e610cd701472bf7c815a6404b6ff88d81838c91"
